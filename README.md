@@ -1,262 +1,316 @@
-# RedVsBlue-Project
 
-# Introduction
+Day 1 Activity File: Red Team
+Monitoring Setup Instructions
 
-I concluded this report with an immersive and very hands-on assessment where I was able to use the tactics and tools available as a Red team player giving me a better understanding of how data exploitation happens and on the Blue side then once the vulnerability has been identified via SIEM (Kibana), I was aware of the same malicious tactics, techniques, and best procedures in order to build a better response strategy around them.
+As you attack a web server today, it will send all of the attack info to an ELK server.
 
-# Network Topology
+The following setup commands need to be run on the Capstone machine before the attack takes place in order to make sure the server is collecting logs.
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img1.png" alt="Spencer custom image"/>
-</p>
+Be sure to complete these steps before starting the attack instructions.
 
 
-# **Red Team Assessment** 
+Instructions
 
-### Recon: Describing the Target
-Nmap allowed me to identified the following hosts on the network:
+Double click on the 'HyperV Manager' Icon on the Desktop to open the HyperV Manager.
 
-| Hostname                              | IP Address    | Role on Network                                |
-|---------------------------------------|---------------|------------------------------------------------|
-| Hyper-V Azure machine ML-RefVm-684427 | 192.168.1.1   | Host Machine Cloud based                       |
-| Kali                                  | 192.168.1.90  | Attacking Machine                              |
-| ELK Stack                             | 192.168.1.100 | SIEM VM                                        |
-| Capstone                              | 192.168.1.105 | Target Machine Replicating a vulnerable server |
+Choose the Capstone machine from the list of Virtual Machines and double-click it to get a terminal window.
 
+Login to the machine using the credentials: vagrant:tnargav
 
-# Vulnerability Assessment
+Switch to the root user with sudo su
 
-### The assessment uncovered the following critical vulnerabilities in the target:
 
-|Vulnerability                          |Description                                                          | Impact                                   |
-|---------------------------------------|---------------------------------------------------------------------|------------------------------------------------|
-| Port 80 open  -  CVE-2019-6579        | Open and unsecured access to anyone attempting entry using Port 80. | Files and Folders are readily accessible. Sensitive (and secret) files and folders can be found.                      |
-| Ability to discover password by Brute force CVE-2019-3746|When an attacker uses numerous user and password combinations to access a device or system. | Easy access by use of brute force by programs such as ‘John the ripper’, Hydra and so on.|                              |
-| LFI Vulnerability                     |LFI allows access into confidential files on a vulnerable machine. | Allows attackers to gain access to sensitive credentials. |
-| Weak Passwords     | Common passwords, and the lack of complexity, such as the inclusion of symbols, numbers and capitals. | System access could be discovered by social engineering. that ‘Leopoldo’ password could be cracked in 21 seconds by a computer. |
+Setup Filebeat
 
+Run the following commands:
 
-# Exploitation: **Brute Force Password**
+filebeat modules enable apache
+filebeat setup
 
+The output should look like this:
 
-**Findings**
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img2.png" alt="Spencer custom image"/>
-</p>
 
-  After mapping the network with nmap I was able to gather valuable data about user information. I tried all the possibilites and the user **‘ashton’** was a good option to explore since he is the Manager/admin.
-                                                                                                                             
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img3.png" alt="Spencer custom image"/>
-</p>
+Setup Metricbeat
 
-**Tools & Processes**
+Run the following commands:
 
-I used Hydra along with a wordlist rockyou.txt using the brute force technique.
+metricbeat modules enable apache
+metricbeat setup
 
+The output should look like this:
 
-**Command**: # hydra -l ashton -P /usr/share/wordlists/rockyou.txt -s 80 -f -vV 192.168.1.105 http-get /company_folders/secret_folder/
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img4.png" alt="Spencer custom image"/>
-</p>
+Setup Packetbeat
 
-**Achievements**
+Run the following command:
 
-After getting all the information I was able to use the login name **‘ashton’** as well as the password **‘leopoldo’** to gain access.
+packetbeat setup
 
-# Exploitation: **Port 80 Open to Public Access**
+The output should look like this:
 
-**Tools & Processes**
 
-NMAP was used to scan for open ports.
+Restart all 3 services. Run the following commands:
 
-**Achievements**
+systemctl restart filebeat
+systemctl restart metricbeat
+systemctl restart packetbeat
 
-I found 4 hosts up: On the Capstone Machine two ports was open: 22 and 80 (192.68.1.105).
+These restart commands should not give any output:
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img5.png" alt="Spencer custom image"/>
-</p>
 
-# Exploitation: **Hashed Passwords**
+Once all three of these have been enabled, close the terminal window for this machine and proceed with your attack.
 
- After getting access to **"connect_to_corp"** it shows details about the hashed password.
 
-**Findings** 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img6.png" alt="Spencer custom image"/>
-</p>
 
-**Tools & Processes**
+tack!Today, you will act as an offensive security Red Team to exploit a vulnerable Capstone VM.
+You will need to use the following tools, in no particular order:
 
-I used an online tools such as: **hashes.com** and **md5decrypt.net** to crack the hashed password.
+Firefox
+Hydra
+Nmap
+John the Ripper
+Metasploit
+curl
+MSVenom
 
-**Achievements**
+Setup
 
-The username **Ryan** used the password ‘**linux4u**’ to access the **/webdav** folder. On my attacker machine I was able to access the server **dav://172.16.84.205/webdav** and I was able to login successfully.
+Your entire attack will take place using the Kali Linux Machine.
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img7.png" alt="Spencer custom image"/>
-</p>
+Inside the HyperV Manager, double-click on the Kali machine to bring up the VM login window.
 
-# Exploitation: **LFI vulnerability**
+Login with the credentials: root:toor
 
-**Tools & Processes**
 
-For the next step I used msfvenom and meterpreter to deliver a payload (php file) onto the vulnerable machine using the reverse shell payload script.
+Instructions
 
-**Achievements**
+Complete the following to find the flag:
 
-Using the **multi/handler** exploit I could get access to the machine’s shell.
+Discover the IP address of the Linux web server.
+192.168.1.105
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img8.png" alt="Spencer custom image"/>
-</p>
+Locate the hidden directory on the web server.
+Hint: Use a browser to see which web pages will load, and/or use a tool like dirb to find URLs on the target site.
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img9.png" alt="Spencer custom image"/>
-</p>
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img10.png" alt="Spencer custom image"/>
-</p>
+http://192.168.1.105/company_folders/secret_folder
 
-### Flag captured
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img11.png" alt="Spencer custom image"/>
-</p>
+Brute force the password for the hidden directory using the hydra command:
+Hint: You may need to use gunzip to unzip rockyou.txt.gz before running Hydra.
+Hint: hydra -l <username> -P <wordlist> -s <port> -f -vV
+<victim.server.ip.address> http-get <path/to/secret/directory>
+hydra -l ashton -P /usr/share/wordlists/rockyou.txt -s 80 -f -vV 192.168.1.105 http-get http://192.168.1.105/company_folders/secret_folder
 
-# **Blue Team Assessment** 
-## Log Analysis and Attack Characterization
 
-### Analysis: Identifying the Port Scan
 
-● The port scan started on October 23, 2021 at 18:00.
 
-● 84,041 connections occurred, the source IP: 192.168.1.90.
+Break the hashed password with the Crack Station website or John the Ripper.
+linux4u
+Connect to the server via WebDav.
+Hint: Look for WebDAV connection instructions in the file located in the secret directory. Note that these instructions may have an old IP Address in them, so you will need to use the IP address you have discovered.
 
-● The sudden peaks in network traffic indicate that this was a port scan.
 
-<p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img12.png" alt="Spencer custom image"/>
- </p>
- 
-  ### Analysis: Finding the Request for a Hidden Directory
-  
- ● The request started at 17:00 hrs on October 23th, 2021.
- 
- ● 30,450 requests were made to access the /secret_folder.
- 
- ● This folder contained a hash that I could use to access the system using another employee’s credentials (Ryan).
- 
- <p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img13.png" alt="Spencer custom image"/>
-</p>
 
-### Analysis: Uncovering a Brute Force Attack
 
- ● 30,450 requests were made in the attack to access the /secret_folder.
- 
- ● 30 attacks were successful. 100% of these attacks returned a 301 HTTP status code “Moved Permanently”.
- 
- <p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img14.png" alt="Spencer custom image"/>****
-</p>
+Upload a PHP reverse shell payload.
+Hint: Try using your scripting skills! MSVenom may also be helpful.
 
-### Analysis: Finding the WebDAV Connection
 
-●  96 requests were made to access the /webdav directory.
+Execute payload that you uploaded to the site to open up a meterpreter session.
+Find and capture the flag.
 
-●  The primary requests were for the passwd.dav and shell.php files.
- 
- <p align="center">
-  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/img15.png" alt="Spencer custom image"/>
-</p>
 
-# **Blue Team**
+After you have captured the flag, show it to your instructor.
 
-## Proposed Alarms and Mitigation Strategies
+Be sure to save important files (e.g., scan results) and take screenshots as you work through the assessment. You'll use them again when creating your presentation.
 
-# Mitigation: Blocking the Port Scan
+Day 2 Activity File: Incident Analysis with Kibana
+Today, you will use Kibana to analyze logs taken during the Red Team attack. As you analyze, you will use the data to develop ideas for new alerts that can improve your monitoring.
 
-## Alarm
+Important: Any time you use data in a dashboard to justify an answer, take a screenshot. You'll need these screenshots when you develop your presentation on Day 3 of this project.
+⚠ Heads Up: To complete today's part of the project, you must complete steps 1-6 from the last class. Finding the flag isn't critical, but you want to get past the point of uploading the reverse
+shell script.
 
-● I recommend an alert to be sent once 1000 connections occurs in 30 minutes.
+Instructions
 
-## System Hardening
+Even though you already know what you did to exploit the target, analyzing the logs is still valuable. It will teach you:
 
-● Automatize a Python script along with NMAP Scan to proactively detect and audit any open ports.
+What your attack looks like from a defender's perspective.
 
-● Ensure the firewall has the latest patched constantly in order to avoid zero-day attacks.
+How stealthy or detectable your tactics are.
 
-●  Redirect open ports to “honeypots” or empty hosts.
+Which kinds of alarms and alerts SOC and IR professionals can set to spot attacks like yours while they occur, rather than after.
 
-●  Enable 3rd gen. of Deception Technology.
 
-# Mitigation: Finding the Request for the Hidden Directory
+Adding Kibana Log Data
 
-## Alarm
+To start viewing logs in Kibana, we will need to import our filebeat, metricbeat and packetbeat data.
 
-● Set an alert when an invader requests access to hidden folder occur. 
+Double-click the Google Chrome icon on the Windows host's desktop to launch Kibana. If it doesn't load as the default page, navigate to http://192.168.1.105:5601.
 
-● I would recommend a threshold of maximum 3 attempts per every 30 minutes that would trigger an alert to be sent.
+This will open 4 tabs automatically, but for now, we only want to use the first tab. Click on the Explore My Own link to get started.
+Adding Appache logs
 
-## System Hardening
+Click on Add Log Data
 
-● Store highly sensitive information on a offline environment or a secured private cloud.
 
-● Rename folders containing critical data.
+Click on Apache logs
 
-● Encrypt data contained within confidential folders 
 
-● Manage IP addresses either to add on the whitelist or blocklist.
+Scroll to the bottom of the page. Click on Check Data You should see a message highlighted in green: Data successfully received from this module
 
-# Mitigation: Preventing Brute Force Attacks
 
-## Alarm
+Return to the Home screen by moving back 2 pages.
 
-A HTTP 401 Unauthorized client error indicates that the client failed to provide any such authentication. 
+Adding System Logs
 
-● I would detect future brute force attacks by setting an alarm that alerts if a 401 error is returned. 
+Click on Add Log Data
 
-● The threshold I would set to activate this alarm would be when 10 errors are returned.
+)
 
-## System Hardening
+Click on System logs
 
-● I would create a policy that locks out accounts after 3 unsuccessful attempts and contact Service Desk to confirm PII and unlock account. 
 
-● I would create a password policy that requires password complexity (Lowercase, Uppercase, Number and a Special character.) expiring every 3 months and not accepting same old passwords.
+Scroll to the bottom of the page. Click on Check Data You should see a message highlighted in green: Data successfully received from this module
 
-● I would create a blocklist of IP addresses based on IP addresses that have 30 unsuccessful attempts in 3 months. If the IP address happens to be a staff member, advise may be required by the cybersecurity team.
 
-# Mitigation: Detecting the WebDAV Connection
+Return to the Home screen by moving back 2 pages.
 
-## Alarm
+Adding Apache Metrics
 
-● First, I would create a Whitelist of trusted IP Addresses. According to the least privilege access On HTTP GET request, I would set an alarm that activates on any IP address trying to access the webDAV directory. The threshold I would set to activate this alarm would be when any HTTP PUT request is made.
+Click on Add Metric Data
 
-## System Hardening
 
-● Create a whitelist of trusted IP addresses and ensure that the firewall security policy prevents all other access. 
 
-● In conjunction with other mitigation strategies, I would ensure that any access to the WebDAV folder is only permitted by users with ‘Salted’ passwords.
 
-● Enable MFA.
 
-# Mitigation: Identifying Reverse Shell Uploads
 
-## Alarm
+Click on Apache Metrics
 
-● Create an alert for any suspicious traffic on port 4444. The alert needs to be sent is when one or more attempt is made. 
 
-● I recommend setting an alert for suspicious extensions being uploaded into the /webDAV folder. The alert needs to be sent is when one or more attempt is made. 
+Scroll to the bottom of the page. Click on Check Data You should see a message highlighted in green: Data successfully received from this module
 
-## System Hardening
 
-● Block all IP addresses other than whitelisted IP addresses (because reverse shells can be created over DNS, this action will only limit the risk of connect-back shell). 
+Return to the Home screen by moving back 2 pages.
 
-● On the /webDAV folder enable read only to prevent payloads uploaded.
+Adding System Metrics
 
-● Only necessary ports are open.
+Click on Add Metric Data
+
+
+
+
+
+Click on System Metrics
+
+
+Scroll to the bottom of the page. Click on Check Data You should see a message highlighted in green: Data successfully received from this module
+
+
+
+
+Close Google Chrome and all of it's tabs. Double click on Chrome to re-open it.
+
+Dashboard Creation
+
+Create a Kibana dashboard using the pre-built visualizations. On the left navigation panel, click on Dashboards.
+
+Click on Create dashboard in the upper right hand side.
+
+
+On the new page click on Add an existing to add the following existing reports:
+
+HTTP status codes for the top queries [Packetbeat] ECS
+Top 10 HTTP requests [Packetbeat] ECS
+Network Traffic Between Hosts [Packetbeat Flows] ECS
+Top Hosts Creating Traffic [Packetbeat Flows] ECS
+Connections over time [Packetbeat Flows] ECS
+HTTP error codes [Packetbeat] ECS
+Errors vs successful transactions [Packetbeat] ECS
+HTTP Transactions [Packetbeat] ECS
+
+Example for adding the first report:
+
+
+
+
+The remaining steps will be a process of self-discovery to be completed without screen shot examples.
+
+Get familiar with running search queries in the Discover screen with Packetbeat. This will be located on your fourth tab in Chrome.
+
+On the Discover page, locate the search field.
+Start typing source and notice the suggestions that come up.
+Search for the source.ip of your attacking machine.
+Use AND and NOT to further filter you search and look for communications between your attacking machine and the victim machine.
+Other things to look for:
+url
+status_code
+error_code
+
+After creating your dashboard and becoming familiar with the search syntax, use these tools to answer the questions below:
+
+Identify the offensive traffic. Port Scan
+
+
+
+Identify the traffic between your machine and the web machine:
+When did the interaction occur?
+1. 04/03/2022 
+What responses did the victim send back? 1. 200, 304, 400, 401 & 404
+What data is concerning from the Blue Team perspective?
+The amount of traffic is huge and during a short amount of time, indicating that an attack was conducted
+Find the request for the hidden directory.
+
+In your attack, you found a secret folder. Let's look at that interaction between these two machines.
+How many requests were made to this directory? At what time and from which IP address(es)?
+1. 12
+2. 02/03/2022 @ 01:15:53.800
+3. 192.168.1.90 -> 192.168.1.105
+Which files were requested? What information did they contain?
+
+_doc
+Ryan’s password hash
+What kind of alarm would you set to detect this behavior in the future?
+1. To send an alert when any IP that is not whitelisted, tries to access this directory
+Identify at least one way to harden the vulnerable machine that would mitigate this attack.
+Removing the directory from the server
+rmdir -r
+Identify the brute force attack.
+
+
+
+
+After identifying the hidden directory, you used Hydra to brute-force the target server. Answer the following questions:
+Can you identify packets specifically from Hydra?
+See above pic
+How many requests were made in the brute-force attack? 1. 371,867
+How many requests had the attacker made before discovering the correct password in this one?
+1. It was a little less than 10,135 (i thought my screenshot from the first class included what number it was)
+
+
+
+What kind of alarm would you set to detect this behavior in the future and at what threshold(s)?
+1. I would set an alarm to alert if this error code comes back a certain amount of times in a timeframe, such as 5 times within a 30 minute window.
+Identify at least one way to harden the vulnerable machine that would mitigate this attack.
+1. Limit the amount of times a failed password can happen and block all IP addresses that are not approved for company use.
+Find the WebDav connection.
+
+Use your dashboard to answer the following questions:
+How many requests were made to this directory? 1. 20
+Which file(s) were requested?
+.php
+What kind of alarm would you set to detect such access in the future?
+1. Alarms should be set for any IP that is not whitelisted and for any IP outside the server range
+Identify at least one way to harden the vulnerable machine that would mitigate this attack.
+1. No one should be able to access this server from the web and only from whitelisted IPs
+
+Identify the reverse shell and meterpreter traffic.
+
+To finish off the attack, you uploaded a PHP reverse shell and started a meterpreter shell session. Answer the following questions:
+Can you identify traffic from the meterpreter session?
+Yes, under the http.response.status_phrase, it shows multi-status
+What kinds of alarms would you set to detect this behavior in the future?
+1. Flag any traffic where a .php file is uploaded
+Identify at least one way to harden the vulnerable machine that would mitigate this attack.
+1. Lock down outgoing connectivity to allow only specific remote IP addresses and ports for the required services.
