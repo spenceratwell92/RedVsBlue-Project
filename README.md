@@ -7,7 +7,7 @@ I concluded this report with an immersive and very hands-on assessment where I w
 # Network Topology
 
 <p align="center">
-  img1
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img1.png" alt="Spencer custom image"/>
 </p>
 
 
@@ -42,13 +42,13 @@ Nmap allowed me to identified the following hosts on the network:
 **Findings**
 
 <p align="center">
- img2
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img2.png" alt="Spencer custom image"/>
 </p>
 
   After mapping the network with nmap I was able to gather valuable data about user information. I tried all the possibilites and the user **‘ashton’** was a good option to explore since he is the Manager/admin.
                                                                                                                              
 <p align="center">
-  <img3
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img3.png" alt="Spencer custom image"/>
 </p>
 
 **Tools & Processes**
@@ -59,7 +59,7 @@ I used Hydra along with a wordlist rockyou.txt using the brute force technique.
 **Command**: # hydra -l ashton -P /usr/share/wordlists/rockyou.txt -s 80 -f -vV 192.168.1.105 http-get /company_folders/secret_folder/
 
 <p align="center">
-  <img4
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img4.png" alt="Spencer custom image"/>
 </p>
 
 **Achievements**
@@ -77,7 +77,7 @@ NMAP was used to scan for open ports.
 I found 4 hosts up: On the Capstone Machine two ports was open: 22 and 80 (192.68.1.105).
 
 <p align="center">
-  <img5
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img5.png" alt="Spencer custom image"/>
 </p>
 
 # Exploitation: **Hashed Passwords**
@@ -86,7 +86,7 @@ I found 4 hosts up: On the Capstone Machine two ports was open: 22 and 80 (192.6
 
 **Findings** 
 <p align="center">
-  <img6
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img6.png" alt="Spencer custom image"/>
 </p>
 
 **Tools & Processes**
@@ -98,7 +98,7 @@ I used an online tools such as: **hashes.com** and **md5decrypt.net** to crack t
 The username **Ryan** used the password ‘**linux4u**’ to access the **/webdav** folder. On my attacker machine I was able to access the server **dav://172.16.84.205/webdav** and I was able to login successfully.
 
 <p align="center">
-  <img7
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img7.png" alt="Spencer custom image"/>
 </p>
 
 # Exploitation: **LFI vulnerability**
@@ -112,20 +112,20 @@ For the next step I used msfvenom and meterpreter to deliver a payload (php file
 Using the **multi/handler** exploit I could get access to the machine’s shell.
 
 <p align="center">
-  <img7
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img8.png" alt="Spencer custom image"/>
 </p>
 
 <p align="center">
-  <img8
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img9.png" alt="Spencer custom image"/>
 </p>
 
 <p align="center">
-  <img9
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img10.png" alt="Spencer custom image"/>
 </p>
 
 ### Flag captured
 <p align="center">
-  <img10
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img11.png" alt="Spencer custom image"/>
 </p>
 
 # **Blue Team Assessment** 
@@ -140,7 +140,7 @@ Using the **multi/handler** exploit I could get access to the machine’s shell.
 ● The sudden peaks in network traffic indicate that this was a port scan.
 
 <p align="center">
-  <img11
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img12.png" alt="Spencer custom image"/>
  </p>
  
   ### Analysis: Finding the Request for a Hidden Directory
@@ -152,7 +152,7 @@ Using the **multi/handler** exploit I could get access to the machine’s shell.
  ● This folder contained a hash that I could use to access the system using another employee’s credentials (Ryan).
  
  <p align="center">
-  <img12
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img13.png" alt="Spencer custom image"/>
 </p>
 
 ### Analysis: Uncovering a Brute Force Attack
@@ -162,7 +162,7 @@ Using the **multi/handler** exploit I could get access to the machine’s shell.
  ● 30 attacks were successful. 100% of these attacks returned a 301 HTTP status code “Moved Permanently”.
  
  <p align="center">
-  <img13
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img14.png" alt="Spencer custom image"/>****
 </p>
 
 ### Analysis: Finding the WebDAV Connection
@@ -172,7 +172,7 @@ Using the **multi/handler** exploit I could get access to the machine’s shell.
 ●  The primary requests were for the passwd.dav and shell.php files.
  
  <p align="center">
-  <img14
+  <img src="https://github.com/spenceratwell92/RedVsBlue-Project/blob/main/Images/Img15.png" alt="Spencer custom image"/>
 </p>
 
 # **Blue Team**
